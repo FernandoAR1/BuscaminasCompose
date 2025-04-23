@@ -1,7 +1,7 @@
 class MiException(mensaje:String):Exception(mensaje)
 class Buscaminas(private var size:Int,private var numminas:Int){
     init {
-        if (size<=1){
+        if (size<=1||size>15){
             throw MiException("tamaño del buscaminas no valido")
         }
         if ((numminas>(size*size))||numminas<=0){

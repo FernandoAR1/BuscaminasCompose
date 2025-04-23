@@ -11,6 +11,8 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import java.text.SimpleDateFormat
+import java.util.*
 
 @Composable
 @Preview
@@ -20,14 +22,32 @@ fun App() {
     var game by remember { mutableStateOf<Buscaminas?>(null) }
     var texts by remember { mutableStateOf(Array(8) { Array(8) { "X" } }) }
     var info by remember { mutableStateOf("") }
+    var hora by remember { mutableStateOf(obtenerHoraActual()) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            hora = obtenerHoraActual()
+            kotlinx.coroutines.delay(500) // Actualiza cada segundo
+        }
+    }
     var sizeInt=0
 
     MaterialTheme {
+        Row (
+            modifier = Modifier.fillMaxWidth().padding(8.dp),
+            horizontalArrangement = Arrangement.End,
+        ){
+            Text(hora, style = MaterialTheme.typography.h6)
+        }
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Row (
+                modifier = Modifier.padding(bottom = 50.dp),
+            ){
+                Text("Buscaminas", style = MaterialTheme.typography.h4)
+            }
             Row {
                 TextField(
                     value = size,
@@ -41,17 +61,20 @@ fun App() {
                     label = { Text("Mines") },
                     modifier = Modifier.padding(8.dp)
                 )
-            }
-            Button(onClick = {
-                sizeInt = size.toIntOrNull() ?: 8
-                val minesInt = mines.toIntOrNull() ?: 10
-                game = Buscaminas(sizeInt, minesInt)
-                game?.creartablero()
-                game?.ponerminas()
-                texts = Array(sizeInt) { Array(sizeInt) { "" } }
-                info = ""
-            }) {
-                Text("Start Game")
+                Button(onClick = {
+                    sizeInt = size.toIntOrNull() ?: 8
+                    val minesInt = mines.toIntOrNull() ?: 10
+                    game = Buscaminas(sizeInt, minesInt)
+                    game?.creartablero()
+                    game?.ponerminas()
+                    texts = Array(sizeInt) { Array(sizeInt) { "" } }
+                    info = ""
+                }
+                , modifier = Modifier.padding(10.dp)
+                )
+                {
+                    Text("Start Game")
+                }
             }
             game?.let { game ->
                 Text(info)
@@ -121,9 +144,17 @@ fun App() {
         }
     }
 }
-
+fun obtenerHoraActual(): String {
+    val formato = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+    return formato.format(Date())
+}
 fun main() = application {
-    Window(onCloseRequest = ::exitApplication, title = "Buscaminas") {
+    Window(
+        onCloseRequest = ::exitApplication,
+        title = "Buscaminas",
+        state = androidx.compose.ui.window.WindowState(placement = androidx.compose.ui.window.WindowPlacement.Maximized)
+    )
+    {
         App()
     }
 }
